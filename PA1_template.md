@@ -6,7 +6,9 @@ Loading and preprocessing data
 ```r
 library(dplyr)
 library(ggplot2)
-setwd("C:/Users/Jay/Documents/DataAnalysis/Data")
+url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+download.file(url,dest="./tempact.zip",method="libcurl")
+unzip("tempact.zip")
 ActRawData <- read.csv(".\\activity.csv")
 str(ActRawData)
 ```
@@ -44,8 +46,6 @@ hist(TotStepsbyDay, main="Total Steps by Day", col="wheat", xlab = "Total Steps 
 ![plot of chunk meantotals](figure/meantotals-1.png) 
 
 ```r
-# Bar plot - Total # of steps for each day
-#barplot(TotStepsbyDay, col="wheat", xlab="Date", ylab="Total Steps", main="Total Steps #by Day")
 # Calculate mean and median for each day
 MeanStepsbyDay <- tapply(TidyActData$steps, TidyActData$date, mean,na.rm=T)
 data.frame(MeanStepsbyDay)
@@ -192,16 +192,13 @@ Average daily activity pattern
 #Calculate avg daily actvity by Intervals
 aggIntdata <-aggregate(TidyActData, by=list(TidyActData$interval), FUN=mean, na.rm=TRUE)
 #Plot average daily activity patterns
-#Plot 1 - average daily activity patterns by interval
-#Plot 2 - average daily activity patterns by abolute Time intervals
 par(mfrow = c(1, 1), mar = c(4, 4, 2, 1), oma = c(0, 0, 2, 0))
 with(aggIntdata, {
     plot(steps , type = "l", col="blue", main="Activity Pattern by Interval", xlab="Interval (5 minutes)", ylab = "Avg. no. of Steps")
-	abline(v = which(steps==max(steps)), lty = 2, col = "magenta", lwd = 4)
+	abline(v = which(steps==max(steps)), lty = 2, col = "magenta", lwd = 2)
 	points(which(steps==max(steps)), max(steps),pch=3,cex=1,lwd=2,col="red")
 	legend("topright", pch = 3, col = c("red"), legend = c("Max Step Interval" , which(steps==max(steps))))
-	mtext("Average Daily Activity Pattern", outer = TRUE)}
-)
+})
 ```
 
 ![plot of chunk avgact](figure/avgact-1.png) 
@@ -456,9 +453,9 @@ NewTidyData$Day <- weekdays(NewTidyData$date)
 #Changing the Day column "weekend" if it Saturday or Sunday and "weekday" otherwise
 NewTidyData$Day[!(NewTidyData$Day %in% c('Saturday','Sunday'))] = "weekday"
 NewTidyData$Day[NewTidyData$Day %in% c('Saturday','Sunday')] = "weekend"
-#Calculate 
+#Calculate average steps taken per interval
 WdWeData <- aggregate(steps ~ interval + Day, data = NewTidyData, mean)
-#plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) #and the average number of steps taken
+#plot containing a time series plot for the average number of steps taken
 library(lattice)
 xyplot(steps ~ interval | Day , data = WdWeData, type = "l", layout = c(1, 2), ylab = "Number of Steps", xlab="Interval")
 ```
